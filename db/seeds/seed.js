@@ -1,5 +1,5 @@
 const db = require('../connection.js');
-const { formatCategory } = require('../utils/data-manipulation.js');
+const { formatCategories, formatUsers, formatReviews, formatComments } = require('../utils/data-manipulation.js');
 const format = require('pg-format');
 
 const seed = async (data) => {
@@ -14,40 +14,62 @@ const seed = async (data) => {
 
   //Creates new tables
   await db.query(`CREATE TABLE categories (
-      slug VARCHAR(100) PRIMARY KEY,
+      slug VARCHAR(2000) PRIMARY KEY,
       description TEXT NOT NULL
       );`);
   await db.query(`CREATE TABLE users (
-      username VARCHAR(30) PRIMARY KEY,
-      avatar_url TEXT,
-      name VARCHAR(40) NOT NULL
+      username VARCHAR(2000) PRIMARY KEY,
+      avatar_url VARCHAR(2000) NOT NULL,
+      name VARCHAR(2000) NOT NULL
       );`);
   await db.query(`CREATE TABLE reviews (
       review_id SERIAL PRIMARY KEY,
-      title VARCHAR(40) NOT NULL,
-      review_body VARCHAR(350) NOT NULL,
-      review_img_url TEXT DEFAULT 'https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg',
-      votes INT DEFAULT 0,
-      catagory TEXT REFERENCES categories(slug) NOT NULL,
-      owner VARCHAR(30) REFERENCES users(username) NOT NULL,
-      created_at VARCHAR(20) DEFAULT CURRENT_TIMESTAMP
+      title VARCHAR(2000) NOT NULL,
+      review_body VARCHAR(2000) NOT NULL,
+      designer VARCHAR(2000) NOT NULL,
+      review_img_url VARCHAR(2000) DEFAULT 'https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg' NOT NULL,
+      votes INT DEFAULT 0 NOT NULL,
+      category VARCHAR(2000) REFERENCES categories(slug) NOT NULL,
+      owner VARCHAR(2000) REFERENCES users(username) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
       );`);
   await db.query(`CREATE TABLE comments (
       comment_id SERIAL PRIMARY KEY,
-      author VARCHAR(30) REFERENCES users(username) NOT NULL,
+      author VARCHAR(2000) REFERENCES users(username) NOT NULL,
       review_id INT REFERENCES reviews(review_id) NOT NULL,
-      votes INT DEFAULT 0,
-      created_at VARCHAR(20) DEFAULT CURRENT_TIMESTAMP,
-      body TEXT NOT NULL
+      votes INT DEFAULT 0 NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+      body VARCHAR(2000) NOT NULL
     )`);
   console.log('Tables created');
 
   //Inserts formatted category data into category table
-  const insertedCategories = await db.query(format(
+  await db.query(format(
     `INSERT INTO categories 
         (slug, description)
-        VALUES %L RETURNING *;`, formatCategory(categoryData)));
+        VALUES %L RETURNING *;`, formatCategories(categoryData)));
   console.log('Inserted data into categories');
+
+  //Inserts formatted user data into user table
+  await db.query(format(
+    `INSERT INTO users
+        (username, avatar_url, name)
+        VALUES %L RETURNING *;`, formatUsers(userData)));
+  console.log('Inserted data into users');
+
+  //Inserts formatted review data into reviews table
+  const instertedReviews = await db.query(format(
+    `INSERT INTO reviews
+        (title, designer, owner, review_img_url, review_body, category, created_at, votes)
+        VALUES %L RETURNING *;`, formatReviews(reviewData)));
+  console.log('Inserted data into reviews');
+
+  //Inserts formatted comment data into comments table
+  await db.query(format(
+    `INSERT INTO comments
+        (author, review_id, votes, created_at, body)
+        VALUES %L RETURNING *;`, formatComments(commentData, instertedReviews.rows)));
+  console.log('Inserted data into reviews');
 };
 
 module.exports = seed;
