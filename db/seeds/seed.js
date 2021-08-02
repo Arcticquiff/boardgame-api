@@ -48,28 +48,25 @@ const seed = async (data) => {
     `INSERT INTO categories 
         (slug, description)
         VALUES %L RETURNING *;`, formatCategories(categoryData)));
-  console.log('Inserted data into categories');
 
   //Inserts formatted user data into user table
   await db.query(format(
     `INSERT INTO users
         (username, avatar_url, name)
         VALUES %L RETURNING *;`, formatUsers(userData)));
-  console.log('Inserted data into users');
 
   //Inserts formatted review data into reviews table
   const instertedReviews = await db.query(format(
     `INSERT INTO reviews
         (title, designer, owner, review_img_url, review_body, category, created_at, votes)
         VALUES %L RETURNING *;`, formatReviews(reviewData)));
-  console.log('Inserted data into reviews');
 
   //Inserts formatted comment data into comments table
   await db.query(format(
     `INSERT INTO comments
         (author, review_id, votes, created_at, body)
         VALUES %L RETURNING *;`, formatComments(commentData, instertedReviews.rows)));
-  console.log('Inserted data into reviews');
+  console.log('Inserted data into tables');
 };
 
 module.exports = seed;
