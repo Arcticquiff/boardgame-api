@@ -1,1 +1,1 @@
-Create the .env files in this folder
+Create the .env.test and .env.development files in this folder
