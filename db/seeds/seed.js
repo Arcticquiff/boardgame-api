@@ -10,7 +10,7 @@ const seed = async (data) => {
   await db.query('DROP TABLE IF EXISTS reviews;');
   await db.query('DROP TABLE IF EXISTS users;');
   await db.query('DROP TABLE IF EXISTS categories;');
-  console.log('Tables deleted');
+  // console.log('Tables deleted');
 
   //Creates new tables
   await db.query(`CREATE TABLE categories (
@@ -41,7 +41,7 @@ const seed = async (data) => {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
       body VARCHAR(2000) NOT NULL
     )`);
-  console.log('Tables created');
+  // console.log('Tables created');
 
   //Inserts formatted category data into category table
   await db.query(format(
@@ -66,7 +66,7 @@ const seed = async (data) => {
     `INSERT INTO comments
         (author, review_id, votes, created_at, body)
         VALUES %L RETURNING *;`, formatComments(commentData, instertedReviews.rows)));
-  console.log('Inserted data into tables');
+  // console.log('Inserted data into tables');
 };
 
 module.exports = seed;
