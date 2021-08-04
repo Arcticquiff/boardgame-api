@@ -3,6 +3,8 @@ const { selectCategories, selectReview, updateReviewVotes, selectReviews } = req
 exports.getCategories = (req, res) => {
     return selectCategories().then(categories => {
         res.send({ categories });
+    }).catch(err => {
+        next(err);
     });
 };
 exports.getReview = (req, res, next) => {
@@ -12,11 +14,11 @@ exports.getReview = (req, res, next) => {
 };
 exports.getReviews = (req, res, next) => {
     return selectReviews(req.query).then(reviews => {
-        res.send({ reviews });
+        res.send({ reviews: reviews.reviews, total_count: reviews.totalcount });
     }).catch(err => next(err));
 };
-exports.postReviewVotes = (req, res, next) => {
-    return updateReviewVotes(req.params.review_id, req.body.inc_votes).then(updatedReview => {
+exports.patchReviewVotes = (req, res, next) => {
+    return updateReviewVotes(req.params.review_id, req.body).then(updatedReview => {
         res.status(201).send({ updatedReview });
     }).catch(err => next(err));
 };

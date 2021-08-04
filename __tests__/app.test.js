@@ -37,6 +37,7 @@ describe('/api', () => {
         describe('GET', () => {
             test('200 - responds with an array of review objects', () => {
                 return request(app).get('/api/reviews').expect(200).then(result => {
+                    expect(result.body.reviews.length).toBe(5);
                     expect(typeof result.body).toBe('object');
                     expect(result.body).toHaveProperty('reviews');
                     expect(Array.isArray(result.body.reviews)).toBe(true);
@@ -55,9 +56,11 @@ describe('/api', () => {
             describe('QUERIES', () => {
                 describe('pagination', () => {
                     test('200 - returns requested reviews if limit and page are defined', () => {
-                        return Promise.all([request(app).get('/api/reviews?limit=3&&page=2').expect(200).then(result => {
+                        return Promise.all([request(app).get('/api/reviews?limit=3&page=2').expect(200).then(result => {
+                            expect(result.body.reviews.length).toBe(3);
                             expect(result.body.reviews[0].title).toEqual("Build you own tour de Yorkshire");
-                        }), request(app).get('/api/reviews?limit=10&&page=2').expect(200).then(result => {
+                        }), request(app).get('/api/reviews?limit=10&page=2').expect(200).then(result => {
+                            expect(result.body.reviews.length).toBe(3);
                             expect(result.body.reviews[0].title).toEqual("Proident tempor et.");
                         })]);
                     });
@@ -113,15 +116,18 @@ describe('/api', () => {
                 });
                 describe('Errors', () => {
                     test('400 - will respond with err if bad query', () => {
-                        return Promise.all([request(app).get('/api/reviews?category=not_a_category').expect(400).then(result => {
-                            expect(result.body).toEqual({ "message": "invalid query" });
-                        }), request(app).get('/api/reviews?order_by=not_an_order').expect(400).then(result => {
+                        return Promise.all([request(app).get('/api/reviews?order_by=not_an_order').expect(400).then(result => {
                             expect(result.body).toEqual({ "message": "invalid query" });
                         }), request(app).get('/api/reviews?sort_by=not_a_column').expect(400).then(result => {
                             expect(result.body).toEqual({ "message": "invalid query" });
                         }), request(app).get('/api/reviews?limit=not_a_limit').expect(400).then(result => {
                             expect(result.body).toEqual({ "message": "invalid query" });
                         })]);
+                    });
+                    test('404 - will respond with error if category does not exist', () => {
+                        return request(app).get('/api/reviews?category=not_a_category').expect(404).then(result => {
+                            expect(result.body).toEqual({ "message": "category does not exist" });
+                        })
                     });
                 });
             });
@@ -190,6 +196,11 @@ describe('/api', () => {
                         expect(typeof result.body).toBe('object');
                         expect(result.body).toHaveProperty('message');
                         expect(result.body.message).toEqual('bad request');
+                    });
+                });
+                test('400 - if object includes correct key, but has too many keys responds with err message', () => {
+                    return request(app).post('/api/reviews/1').send({ inc_votes: 1, incorrect_key: 1 }).expect(400).then(result => {
+                        expect(result.body).toEqual({ message: 'incorrect object submitted' });
                     });
                 });
                 test('404 - if param is valid but review_id doesn\'t exist respond with err message', () => {
