@@ -8,7 +8,7 @@ exports.selectEndpoints = () => {
         'GET-/api/reviews/:review_id': 'a single review by parametric id num',
         'PATCH-/api/reviews/:review_id': 'adds a number of votes to review in format { inc_votes: num_of_votes }',
         'GET-/api/reviews/:review_id/comments': 'an array of all comments for the review selected',
-        'POST-/api/reviews/review_id/comments': 'adds a comment to the review in the format { username: "username", body: "comment_body" }'
+        'POST-/api/reviews/:review_id/comments': 'adds a comment to the review in the format { username: "username", body: "comment_body" }'
     }
 };
 exports.selectCategories = () => {
