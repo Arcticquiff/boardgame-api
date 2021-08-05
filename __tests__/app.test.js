@@ -18,7 +18,7 @@ describe('/api', () => {
         });
     });
     describe('GET', () => {
-        test.only('200 - returns a list of endpoints to explore', () => {
+        test('200 - returns a list of endpoints to explore', () => {
             return request(app).get('/api').expect(200).then(result => {
                 expect(result.body).toEqual({
                     endpoints: {
@@ -129,6 +129,11 @@ describe('/api', () => {
                             expect(result.body.reviews[0].title).toEqual("Jenga");
                         })]);
                     });
+                    test('200 - will respond with message if category does not exist', () => {
+                        return request(app).get('/api/reviews?category=not_a_category').expect(200).then(result => {
+                            expect(result.body.reviews).toEqual('Nothing yet');
+                        })
+                    });
                 });
                 describe('Errors', () => {
                     test('400 - will respond with err if bad query', () => {
@@ -139,11 +144,6 @@ describe('/api', () => {
                         }), request(app).get('/api/reviews?limit=not_a_limit').expect(400).then(result => {
                             expect(result.body).toEqual({ "message": "invalid query" });
                         })]);
-                    });
-                    test('404 - will respond with error if category does not exist', () => {
-                        return request(app).get('/api/reviews?category=not_a_category').expect(404).then(result => {
-                            expect(result.body).toEqual({ "message": "category does not exist" });
-                        })
                     });
                 });
             });

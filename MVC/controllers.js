@@ -15,7 +15,7 @@ exports.getReview = (req, res, next) => {
 };
 exports.getReviews = (req, res, next) => {
     return selectReviews(req.query).then(reviews => {
-        res.send({ reviews: reviews.reviews, total_count: reviews.totalcount });
+        res.send({ reviews: reviews.reviews || reviews.message, total_count: reviews.totalcount || 0 });
     }).catch(err => next(err));
 };
 exports.getReviewComments = (req, res, next) => {

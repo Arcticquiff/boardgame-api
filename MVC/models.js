@@ -1,4 +1,6 @@
 const db = require('../db/connection');
+const categories = require('../db/data/test-data/categories');
+const categoriesRouter = require('../routers/categories.router');
 const { validateReviewQueries, validatePagination, validateCategory } = require('./helpers');
 
 exports.selectEndpoints = () => {
@@ -40,12 +42,11 @@ exports.selectReviewComments = (review_id) => {
         });
 };
 exports.selectReviews = (queries) => {
+    const whereBox = [];
     //checks for validity using helper funcs
     const validQueries = validateReviewQueries(queries);
     const validPages = validatePagination(queries);
-    const validCategory = validateCategory(queries);
     if (!validQueries || !validPages) return Promise.reject({ status: 400, message: 'invalid query' });
-    if (!validCategory) return Promise.reject({ status: 404, message: "category does not exist" });
     //destuct queries to grab relevent variables 
     const { sort_by = `created_at`, order_by = 'DESC', category, page = 1, limit = 5 } = queries;
     //base query string defined inc the columns to return, left join so we return reviews without any comments
@@ -56,7 +57,10 @@ exports.selectReviews = (queries) => {
                     LEFT JOIN comments 
                     ON comments.review_id = reviews.review_id`;
     //WHERE for category query
-    if (category) queryStr += ` WHERE reviews.category = '${category}'`
+    if (category) {
+        queryStr += ` WHERE reviews.category = $1`
+        whereBox.push(category);
+    }
     //group by added here to preserve correct order
     queryStr += ' GROUP BY reviews.review_id'
     //order of the response dictated by 2 vars, if order_by is ASC it will exclude order_by as by default it is ASC
@@ -66,8 +70,9 @@ exports.selectReviews = (queries) => {
     const offset = (page - 1) * limit
     queryStr += ` LIMIT ${limit} OFFSET ${offset}`
     //query execution and rows passed back to controller
-    return db.query(queryStr + ';').then(reviews => {
-        return { totalcount: reviews.rows.length, reviews: reviews.rows };
+    return db.query(queryStr + ';', whereBox).then(reviews => {
+        if (category && reviews.rows.length === 0) return { message: 'Nothing yet' };
+        else return { totalcount: reviews.rows.length, reviews: reviews.rows };
     });
 };
 exports.updateReviewVotes = (review_id, newReview) => {
