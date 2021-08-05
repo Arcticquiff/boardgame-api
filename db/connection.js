@@ -12,8 +12,7 @@ require('dotenv').config({
   path: path.resolve(__dirname, `../envFiles/.env.${ENV}`),
 });
 
-if (!process.env.PGDATABASE || !process.env.DATABASE_URL) {
-  console.log(process.env.PGDATABASE, process.env.DATABASE_URL)
+if (!process.env.PGDATABASE && !process.env.DATABASE_URL) {
   throw new Error('PGDATABASE or DATABASE_URL not set');
 };
 
