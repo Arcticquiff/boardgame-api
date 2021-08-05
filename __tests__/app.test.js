@@ -11,8 +11,6 @@ describe('/api', () => {
     describe('ANY', () => {
         test('400 - responds with message if incorrect request path', () => {
             return request(app).get('/api/not_a_path').expect(400).then(result => {
-                expect(typeof result.body).toBe('object');
-                expect(result.body).toHaveProperty('message');
                 expect(result.body.message).toEqual('incorrect path');
             });
         });
@@ -33,17 +31,28 @@ describe('/api', () => {
             });
         });
     });
+    describe('/comments', () => {
+        describe('/:comment_id', () => {
+            test('204 - responds with status if delete is successful', () => {
+                return request(app).delete('/api/comments/1').expect(204);
+            });
+            test('400 - responds with err if comment doesn\'t exist', () => {
+                return request(app).delete('/api/comments/1000000').expect(404).then(result => {
+                    expect(result.body).toEqual({ message: 'no comment found' });
+                });
+            });
+        });
+    });
     describe('/categories', () => {
         describe('GET', () => {
             test('200 - responds with an array of category objects, each of which should have keys of slug and description', () => {
                 return request(app).get('/api/categories').expect(200).then(result => {
-                    expect(typeof result.body).toBe('object');
-                    expect(result.body).toHaveProperty('categories');
-                    expect(Array.isArray(result.body.categories)).toBe(true);
                     expect(result.body.categories).toHaveLength(4);
                     result.body.categories.forEach(category => {
-                        expect(category).toHaveProperty('slug');
-                        expect(category).toHaveProperty('description');
+                        expect(category).toMatchObject({
+                            slug: expect.any(String),
+                            description: expect.any(String),
+                        })
                     });
                 });
             });
@@ -58,14 +67,16 @@ describe('/api', () => {
                     expect(result.body).toHaveProperty('reviews');
                     expect(Array.isArray(result.body.reviews)).toBe(true);
                     result.body.reviews.forEach(review => {
-                        expect(review).toHaveProperty('owner');
-                        expect(review).toHaveProperty('title');
-                        expect(review).toHaveProperty('review_id');
-                        expect(review).toHaveProperty('review_img_url');
-                        expect(review).toHaveProperty('category');
-                        expect(review).toHaveProperty('created_at');
-                        expect(review).toHaveProperty('votes');
-                        expect(review).toHaveProperty('comment_count');
+                        expect(review).toMatchObject({
+                            owner: expect.any(String),
+                            title: expect.any(String),
+                            review_id: expect.any(Number),
+                            review_img_url: expect.any(String),
+                            category: expect.any(String),
+                            created_at: expect.any(String),
+                            votes: expect.any(Number),
+                            comment_count: expect.any(String),
+                        })
                     });
                 });
             });
@@ -129,11 +140,7 @@ describe('/api', () => {
                             expect(result.body.reviews[0].title).toEqual("Jenga");
                         })]);
                     });
-                    test('200 - will respond with message if category does not exist', () => {
-                        return request(app).get('/api/reviews?category=not_a_category').expect(200).then(result => {
-                            expect(result.body.reviews).toEqual('Nothing yet');
-                        })
-                    });
+
                 });
                 describe('Errors', () => {
                     test('400 - will respond with err if bad query', () => {
@@ -145,6 +152,11 @@ describe('/api', () => {
                             expect(result.body).toEqual({ "message": "invalid query" });
                         })]);
                     });
+                    test('404 - will respond with message if category does not exist', () => {
+                        return request(app).get('/api/reviews?category=not_a_category').expect(404).then(result => {
+                            expect(result.body).toEqual({ message: 'Nothing yet' });
+                        })
+                    });
                 });
             });
         });
@@ -152,33 +164,27 @@ describe('/api', () => {
             describe('GET', () => {
                 test('200 - responds with an object with a key of "review" and a value of the review object', () => {
                     return request(app).get('/api/reviews/2').expect(200).then(result => {
-                        expect(typeof result.body).toBe('object');
-                        expect(result.body).toHaveProperty('review');
-                        expect(typeof result.body.review).toBe('object');
-                        expect(result.body.review).toHaveProperty('owner');
-                        expect(result.body.review).toHaveProperty('title');
-                        expect(result.body.review).toHaveProperty('review_id');
-                        expect(result.body.review.review_id).toBe(2);
-                        expect(result.body.review).toHaveProperty('review_body');
-                        expect(result.body.review).toHaveProperty('designer');
-                        expect(result.body.review).toHaveProperty('review_img_url');
-                        expect(result.body.review).toHaveProperty('category');
-                        expect(result.body.review).toHaveProperty('created_at');
-                        expect(result.body.review).toHaveProperty('votes');
-                        expect(result.body.review).toHaveProperty('comment_count');
+                        expect(result.body.review).toMatchObject({
+                            owner: expect.any(String),
+                            title: expect.any(String),
+                            review_id: 2,
+                            review_body: expect.any(String),
+                            designer: expect.any(String),
+                            review_img_url: expect.any(String),
+                            category: expect.any(String),
+                            created_at: expect.any(String),
+                            votes: expect.any(Number),
+                            comment_count: expect.any(String),
+                        });
                     });
                 });
                 test('400 - if invalid review_id param responds with err message', () => {
                     return request(app).get('/api/reviews/not_a_vailid_param').expect(400).then(result => {
-                        expect(typeof result.body).toBe('object');
-                        expect(result.body).toHaveProperty('message');
                         expect(result.body.message).toEqual('invalid review_id');
                     });
                 });
                 test('404 - if param is valid but review_id doesn\'t exist respond with err message', () => {
                     return request(app).get('/api/reviews/1000000').expect(404).then(result => {
-                        expect(typeof result.body).toBe('object');
-                        expect(result.body).toHaveProperty('message');
                         expect(result.body.message).toEqual('review not found');
                     });
                 });
@@ -186,37 +192,32 @@ describe('/api', () => {
             describe('PATCH', () => {
                 test('201 - responds with an object with a key of "review" and a value of the updated review object', () => {
                     return request(app).patch('/api/reviews/1').send({ inc_votes: 1 }).expect(201).then(result => {
-                        expect(typeof result.body).toBe('object');
-                        expect(result.body).toHaveProperty('updatedReview');
-                        expect(result.body.updatedReview).toHaveProperty('owner');
-                        expect(result.body.updatedReview).toHaveProperty('title');
-                        expect(result.body.updatedReview).toHaveProperty('review_id');
-                        expect(result.body.updatedReview).toHaveProperty('review_body');
-                        expect(result.body.updatedReview).toHaveProperty('designer');
-                        expect(result.body.updatedReview).toHaveProperty('review_img_url');
-                        expect(result.body.updatedReview).toHaveProperty('category');
-                        expect(result.body.updatedReview).toHaveProperty('created_at');
-                        expect(result.body.updatedReview).toHaveProperty('votes');
-                        expect(result.body.updatedReview.votes).toBe(2);
+                        expect(result.body.updatedReview).toMatchObject({
+                            owner: expect.any(String),
+                            title: expect.any(String),
+                            review_id: expect.any(Number),
+                            review_body: expect.any(String),
+                            designer: expect.any(String),
+                            review_img_url: expect.any(String),
+                            category: expect.any(String),
+                            created_at: expect.any(String),
+                            votes: 2
+                        })
                     });
                 });
                 test('400 - if invalid review_id param responds with err message', () => {
                     return request(app).patch('/api/reviews/not_a_vailid_param').send({ inc_votes: 1 }).expect(400).then(result => {
-                        expect(typeof result.body).toBe('object');
-                        expect(result.body).toHaveProperty('message');
                         expect(result.body.message).toEqual('invalid review_id');
                     });
                 });
                 test('400 - if object does not have correct key responds with err message', () => {
                     return request(app).patch('/api/reviews/1').send({ incorrect_key: 1 }).expect(400).then(result => {
-                        expect(typeof result.body).toBe('object');
-                        expect(result.body).toHaveProperty('message');
                         expect(result.body.message).toEqual('bad request');
                     });
                 });
                 test('400 - if object includes correct key, but has too many keys responds with err message', () => {
                     return request(app).patch('/api/reviews/1').send({ inc_votes: 1, incorrect_key: 1 }).expect(400).then(result => {
-                        expect(result.body).toEqual({ message: 'bad request' });
+                        expect(result.body).toEqual({ message: "unexpected key on request obj" });
                     });
                 });
                 test('404 - if param is valid but review_id doesn\'t exist respond with err message', () => {
@@ -245,15 +246,11 @@ describe('/api', () => {
                     });
                     test('400 - if invalid review_id param responds with err message', () => {
                         return request(app).get('/api/reviews/not_a_vailid_param/comments').expect(400).then(result => {
-                            expect(typeof result.body).toBe('object');
-                            expect(result.body).toHaveProperty('message');
                             expect(result.body.message).toEqual('invalid review_id');
                         });
                     });
                     test('404 - if param is valid but review_id doesn\'t exist respond with err message', () => {
                         return request(app).get('/api/reviews/1000000/comments').expect(404).then(result => {
-                            expect(typeof result.body).toBe('object');
-                            expect(result.body).toHaveProperty('message');
                             expect(result.body.message).toEqual('no comments found');
                         });
                     });
@@ -273,22 +270,19 @@ describe('/api', () => {
                     });
                     test('400 - if invalid review_id param responds with err message', () => {
                         return request(app).post('/api/reviews/not_a_vailid_param/comments').send({ username: 'bainesface', body: 'good game' }).expect(400).then(result => {
-                            expect(typeof result.body).toBe('object');
-                            expect(result.body).toHaveProperty('message');
                             expect(result.body.message).toEqual('invalid review_id');
                         });
                     });
                     test('400 - if incorrect key or too many keys will return err message', () => {
                         return Promise.all([request(app).post('/api/reviews/1/comments').send({ not_a_key: 'bainesface', body: 'good game' }).expect(400).then(result => {
                             expect(result.body).toEqual({ message: 'bad request' });
-                        }), request(app).post('/api/reviews/1/comments').send({ username: 'bainesface', body: 'good game', not_a_key: 'bainesface' }).expect(400).then(result => {
+                        }),
+                        request(app).post('/api/reviews/1/comments').send({ username: 'bainesface', body: 'good game', not_a_key: 'bainesface' }).expect(400).then(result => {
                             expect(result.body).toEqual({ message: 'bad request' });
                         })]);
                     });
                     test('404 - if param is valid but review_id doesn\'t exist respond with err message', () => {
                         return request(app).post('/api/reviews/1000000/comments').send({ username: 'bainesface', body: 'good game' }).expect(404).then(result => {
-                            expect(typeof result.body).toBe('object');
-                            expect(result.body).toHaveProperty('message');
                             expect(result.body.message).toEqual('review not found');
                         });
                     });

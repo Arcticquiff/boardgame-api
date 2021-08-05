@@ -12,8 +12,3 @@ exports.validatePagination = (queries) => {
     if (!page.match(/^[0-9]+$/g)) return false;
     return true;
 };
-exports.validateCategory = (queries) => {
-    const { category } = queries;
-    if (!['strategy', 'hidden-roles', 'dexterity', 'push-your-luck', 'roll-and-write', 'deck-building', 'engine-building', 'social deduction', undefined].includes(category)) return false;
-    return true;
-};

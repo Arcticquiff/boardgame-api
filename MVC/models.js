@@ -71,7 +71,7 @@ exports.selectReviews = (queries) => {
     queryStr += ` LIMIT ${limit} OFFSET ${offset}`
     //query execution and rows passed back to controller
     return db.query(queryStr + ';', whereBox).then(reviews => {
-        if (category && reviews.rows.length === 0) return { message: 'Nothing yet' };
+        if (category && reviews.rows.length === 0) return Promise.reject({ status: 404, message: 'Nothing yet' });
         else return { totalcount: reviews.rows.length, reviews: reviews.rows };
     });
 };
@@ -79,7 +79,7 @@ exports.updateReviewVotes = (review_id, newReview) => {
     const { inc_votes: votes } = newReview;
     if (!votes || typeof votes !== 'number') return Promise.reject({ status: 400, message: 'bad request' })
     if (!review_id.match(/^[0-9]+$/g)) return Promise.reject({ status: 400, message: 'invalid review_id' })
-    if (Object.keys(newReview).length > 1) return Promise.reject({ status: 400, message: 'bad request' })
+    if (Object.keys(newReview).length > 1) return Promise.reject({ status: 400, message: 'unexpected key on request obj' })
     return db.query(`UPDATE reviews
                      SET votes = votes + $1
                      WHERE review_id = $2
@@ -98,5 +98,12 @@ exports.insertComment = (review_id, comment) => {
     ($1, $2, $3) RETURNING *;`, [review_id, comment.username, comment.body])
         .then(comment => {
             return comment.rows[0];
+        });
+};
+exports.removeComment = (comment_id) => {
+    return db.query(`DELETE FROM comments WHERE comment_id = $1 RETURNING *`, [comment_id])
+        .then(comment => {
+            if (comment.rows.length === 0) return Promise.reject({ status: 404, message: 'no comment found' });
+            return;
         });
 };
