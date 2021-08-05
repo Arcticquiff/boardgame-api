@@ -1,7 +1,7 @@
 {
-  "name": "be-nc-games",
+  "name": "tp-boardgame-api",
   "version": "1.0.0",
-  "description": "bc-nc-games",
+  "description": "tp-boardgame-api",
   "main": "index.js",
   "scripts": {
     "setup-dbs": "psql -f ./db/setup.sql",
