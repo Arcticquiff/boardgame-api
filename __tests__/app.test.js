@@ -17,6 +17,22 @@ describe('/api', () => {
             });
         });
     });
+    describe('GET', () => {
+        test.only('200 - returns a list of endpoints to explore', () => {
+            return request(app).get('/api').expect(200).then(result => {
+                expect(result.body).toEqual({
+                    endpoints: {
+                        'GET-/api/categories': 'an array of all the categories and a short description',
+                        'GET-/api/reviews': 'an array of reviews defaulted to limit=5&page=1',
+                        'GET-/api/reviews/:review_id': 'a single review by parametric id num',
+                        'PATCH-/api/reviews/:review_id': 'adds a number of votes to review in format { inc_votes: num_of_votes }',
+                        'GET-/api/reviews/:review_id/comments': 'an array of all comments for the review selected',
+                        'POST-/api/reviews/review_id/comments': 'adds a comment to the review in the format { username: "username", body: "comment_body" }'
+                    }
+                });
+            });
+        });
+    });
     describe('/categories', () => {
         describe('GET', () => {
             test('200 - responds with an array of category objects, each of which should have keys of slug and description', () => {
@@ -169,7 +185,7 @@ describe('/api', () => {
             });
             describe('PATCH', () => {
                 test('201 - responds with an object with a key of "review" and a value of the updated review object', () => {
-                    return request(app).post('/api/reviews/1').send({ inc_votes: 1 }).expect(201).then(result => {
+                    return request(app).patch('/api/reviews/1').send({ inc_votes: 1 }).expect(201).then(result => {
                         expect(typeof result.body).toBe('object');
                         expect(result.body).toHaveProperty('updatedReview');
                         expect(result.body.updatedReview).toHaveProperty('owner');
@@ -185,29 +201,96 @@ describe('/api', () => {
                     });
                 });
                 test('400 - if invalid review_id param responds with err message', () => {
-                    return request(app).post('/api/reviews/not_a_vailid_param').send({ inc_votes: 1 }).expect(400).then(result => {
+                    return request(app).patch('/api/reviews/not_a_vailid_param').send({ inc_votes: 1 }).expect(400).then(result => {
                         expect(typeof result.body).toBe('object');
                         expect(result.body).toHaveProperty('message');
                         expect(result.body.message).toEqual('invalid review_id');
                     });
                 });
                 test('400 - if object does not have correct key responds with err message', () => {
-                    return request(app).post('/api/reviews/1').send({ incorrect_key: 1 }).expect(400).then(result => {
+                    return request(app).patch('/api/reviews/1').send({ incorrect_key: 1 }).expect(400).then(result => {
                         expect(typeof result.body).toBe('object');
                         expect(result.body).toHaveProperty('message');
                         expect(result.body.message).toEqual('bad request');
                     });
                 });
                 test('400 - if object includes correct key, but has too many keys responds with err message', () => {
-                    return request(app).post('/api/reviews/1').send({ inc_votes: 1, incorrect_key: 1 }).expect(400).then(result => {
-                        expect(result.body).toEqual({ message: 'incorrect object submitted' });
+                    return request(app).patch('/api/reviews/1').send({ inc_votes: 1, incorrect_key: 1 }).expect(400).then(result => {
+                        expect(result.body).toEqual({ message: 'bad request' });
                     });
                 });
                 test('404 - if param is valid but review_id doesn\'t exist respond with err message', () => {
-                    return request(app).post('/api/reviews/1000000').send({ inc_votes: 1 }).expect(404).then(result => {
+                    return request(app).patch('/api/reviews/1000000').send({ inc_votes: 1 }).expect(404).then(result => {
                         expect(typeof result.body).toBe('object');
                         expect(result.body).toHaveProperty('message');
                         expect(result.body.message).toEqual('review not found');
+                    });
+                });
+            });
+            describe('/comments', () => {
+                describe('GET', () => {
+                    test('200 - responds with an array of comment objects for the given review', () => {
+                        return request(app).get('/api/reviews/2/comments').expect(200).then(result => {
+                            result.body.comments.forEach(comment => {
+                                expect(comment).toEqual({
+                                    "author": expect.any(String),
+                                    "body": expect.any(String),
+                                    "comment_id": expect.any(Number),
+                                    "created_at": expect.any(String),
+                                    "votes": expect.any(Number),
+                                });
+                            });
+                            expect(result.body.comments).toHaveLength(3);
+                        });
+                    });
+                    test('400 - if invalid review_id param responds with err message', () => {
+                        return request(app).get('/api/reviews/not_a_vailid_param/comments').expect(400).then(result => {
+                            expect(typeof result.body).toBe('object');
+                            expect(result.body).toHaveProperty('message');
+                            expect(result.body.message).toEqual('invalid review_id');
+                        });
+                    });
+                    test('404 - if param is valid but review_id doesn\'t exist respond with err message', () => {
+                        return request(app).get('/api/reviews/1000000/comments').expect(404).then(result => {
+                            expect(typeof result.body).toBe('object');
+                            expect(result.body).toHaveProperty('message');
+                            expect(result.body.message).toEqual('no comments found');
+                        });
+                    });
+                });
+                describe('POST', () => {
+                    test('201 - responds with newly added comment', () => {
+                        return request(app).post('/api/reviews/1/comments').send({ username: 'bainesface', body: 'good game' }).expect(201).then(result => {
+                            expect(result.body.comment).toEqual({
+                                comment_id: expect.any(Number),
+                                author: expect.any(String),
+                                review_id: 1,
+                                votes: expect.any(Number),
+                                created_at: expect.any(String),
+                                body: expect.any(String)
+                            });
+                        });
+                    });
+                    test('400 - if invalid review_id param responds with err message', () => {
+                        return request(app).post('/api/reviews/not_a_vailid_param/comments').send({ username: 'bainesface', body: 'good game' }).expect(400).then(result => {
+                            expect(typeof result.body).toBe('object');
+                            expect(result.body).toHaveProperty('message');
+                            expect(result.body.message).toEqual('invalid review_id');
+                        });
+                    });
+                    test('400 - if incorrect key or too many keys will return err message', () => {
+                        return Promise.all([request(app).post('/api/reviews/1/comments').send({ not_a_key: 'bainesface', body: 'good game' }).expect(400).then(result => {
+                            expect(result.body).toEqual({ message: 'bad request' });
+                        }), request(app).post('/api/reviews/1/comments').send({ username: 'bainesface', body: 'good game', not_a_key: 'bainesface' }).expect(400).then(result => {
+                            expect(result.body).toEqual({ message: 'bad request' });
+                        })]);
+                    });
+                    test('404 - if param is valid but review_id doesn\'t exist respond with err message', () => {
+                        return request(app).post('/api/reviews/1000000/comments').send({ username: 'bainesface', body: 'good game' }).expect(404).then(result => {
+                            expect(typeof result.body).toBe('object');
+                            expect(result.body).toHaveProperty('message');
+                            expect(result.body.message).toEqual('review not found');
+                        });
                     });
                 });
             });

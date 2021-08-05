@@ -1,6 +1,16 @@
 const db = require('../db/connection');
 const { validateReviewQueries, validatePagination, validateCategory } = require('./helpers');
 
+exports.selectEndpoints = () => {
+    return {
+        'GET-/api/categories': 'an array of all the categories and a short description',
+        'GET-/api/reviews': 'an array of reviews defaulted to limit=5&page=1',
+        'GET-/api/reviews/:review_id': 'a single review by parametric id num',
+        'PATCH-/api/reviews/:review_id': 'adds a number of votes to review in format { inc_votes: num_of_votes }',
+        'GET-/api/reviews/:review_id/comments': 'an array of all comments for the review selected',
+        'POST-/api/reviews/review_id/comments': 'adds a comment to the review in the format { username: "username", body: "comment_body" }'
+    }
+};
 exports.selectCategories = () => {
     return db.query('SELECT * FROM categories;').then(categories => {
         return categories.rows;
@@ -19,18 +29,14 @@ exports.selectReview = (review_id) => {
             return review.rows[0];
         });
 };
-exports.updateReviewVotes = (review_id, newReview) => {
-    const { inc_votes: votes } = newReview;
-    if (!votes || typeof votes !== 'number') return Promise.reject({ status: 400, message: 'bad request' })
+exports.selectReviewComments = (review_id) => {
     if (!review_id.match(/^[0-9]+$/g)) return Promise.reject({ status: 400, message: 'invalid review_id' })
-    if (Object.keys(newReview).length > 1) return Promise.reject({ status: 400, message: 'incorrect object submitted' })
-    return db.query(`UPDATE reviews
-                     SET votes = votes + $1
-                     WHERE review_id = $2
-                     RETURNING *;`, [votes, review_id])
-        .then(review => {
-            if (review.rows.length === 0) return Promise.reject({ status: 404, message: 'review not found' })
-            return review.rows[0];
+    return db.query(`SELECT comment_id, author, votes, created_at, body
+                     FROM comments
+                     WHERE comments.review_id = $1`, [review_id])
+        .then(comments => {
+            if (comments.rows.length === 0) return Promise.reject({ status: 404, message: 'no comments found' })
+            return comments.rows;
         });
 };
 exports.selectReviews = (queries) => {
@@ -63,4 +69,29 @@ exports.selectReviews = (queries) => {
     return db.query(queryStr + ';').then(reviews => {
         return { totalcount: reviews.rows.length, reviews: reviews.rows };
     });
+};
+exports.updateReviewVotes = (review_id, newReview) => {
+    const { inc_votes: votes } = newReview;
+    if (!votes || typeof votes !== 'number') return Promise.reject({ status: 400, message: 'bad request' })
+    if (!review_id.match(/^[0-9]+$/g)) return Promise.reject({ status: 400, message: 'invalid review_id' })
+    if (Object.keys(newReview).length > 1) return Promise.reject({ status: 400, message: 'bad request' })
+    return db.query(`UPDATE reviews
+                     SET votes = votes + $1
+                     WHERE review_id = $2
+                     RETURNING *;`, [votes, review_id])
+        .then(review => {
+            if (review.rows.length === 0) return Promise.reject({ status: 404, message: 'review not found' })
+            return review.rows[0];
+        });
+};
+exports.insertComment = (review_id, comment) => {
+    if (Object.keys(comment).length > 2) return Promise.reject({ status: 400, message: 'bad request' })
+    if (!review_id.match(/^[0-9]+$/g)) return Promise.reject({ status: 400, message: 'invalid review_id' })
+    return db.query(`INSERT INTO comments 
+    (review_id, author, body)
+    VALUES 
+    ($1, $2, $3) RETURNING *;`, [review_id, comment.username, comment.body])
+        .then(comment => {
+            return comment.rows[0];
+        });
 };
