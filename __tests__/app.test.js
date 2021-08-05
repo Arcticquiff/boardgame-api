@@ -25,7 +25,9 @@ describe('/api', () => {
                         'GET-/api/reviews/:review_id': 'a single review by parametric id num',
                         'PATCH-/api/reviews/:review_id': 'adds a number of votes to review in format { inc_votes: num_of_votes }',
                         'GET-/api/reviews/:review_id/comments': 'an array of all comments for the review selected',
-                        'POST-/api/reviews/:review_id/comments': 'adds a comment to the review in the format { username: "username", body: "comment_body" }'
+                        'POST-/api/reviews/:review_id/comments': 'adds a comment to the review in the format { username: "username", body: "comment_body" }',
+                        'DELETE-/api/comments/:comment_id': 'deletes a comment by parametric comment_id',
+                        'GET-/api/users': 'an array of username objects'
                     }
                 });
             });
@@ -33,12 +35,28 @@ describe('/api', () => {
     });
     describe('/comments', () => {
         describe('/:comment_id', () => {
-            test('204 - responds with status if delete is successful', () => {
-                return request(app).delete('/api/comments/1').expect(204);
+            describe('DELETE', () => {
+                test('204 - responds with status if delete is successful', () => {
+                    return request(app).delete('/api/comments/1').expect(204);
+                });
+                test('400 - responds with err if comment doesn\'t exist', () => {
+                    return request(app).delete('/api/comments/1000000').expect(404).then(result => {
+                        expect(result.body).toEqual({ message: 'no comment found' });
+                    });
+                });
             });
-            test('400 - responds with err if comment doesn\'t exist', () => {
-                return request(app).delete('/api/comments/1000000').expect(404).then(result => {
-                    expect(result.body).toEqual({ message: 'no comment found' });
+        });
+    });
+    describe('/users', () => {
+        describe('GET', () => {
+            test('200 - responds with an array of objects with usernames as the key', () => {
+                return request(app).get('/api/users').expect(200).then(result => {
+                    expect(result.body.users).toHaveLength(4);
+                    result.body.users.forEach(user => {
+                        expect(user).toEqual({
+                            username: expect.any(String)
+                        });
+                    });
                 });
             });
         });
@@ -80,7 +98,7 @@ describe('/api', () => {
                     });
                 });
             });
-            describe('QUERIES', () => {
+            describe('GET-QUERIES', () => {
                 describe('pagination', () => {
                     test('200 - returns requested reviews if limit and page are defined', () => {
                         return Promise.all([request(app).get('/api/reviews?limit=3&page=2').expect(200).then(result => {
