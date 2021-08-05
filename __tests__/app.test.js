@@ -39,9 +39,14 @@ describe('/api', () => {
                 test('204 - responds with status if delete is successful', () => {
                     return request(app).delete('/api/comments/1').expect(204);
                 });
-                test('400 - responds with err if comment doesn\'t exist', () => {
+                test('404 - responds with err if comment doesn\'t exist', () => {
                     return request(app).delete('/api/comments/1000000').expect(404).then(result => {
                         expect(result.body).toEqual({ message: 'no comment found' });
+                    });
+                });
+                test('400 responds with err if invail comment param', () => {
+                    return request(app).delete('/api/comments/not_a_param').expect(400).then(result => {
+                        expect(result.body).toEqual({ message: 'invalid comment_id' });
                     });
                 });
             });
@@ -81,9 +86,6 @@ describe('/api', () => {
             test('200 - responds with an array of review objects', () => {
                 return request(app).get('/api/reviews').expect(200).then(result => {
                     expect(result.body.reviews.length).toBe(5);
-                    expect(typeof result.body).toBe('object');
-                    expect(result.body).toHaveProperty('reviews');
-                    expect(Array.isArray(result.body.reviews)).toBe(true);
                     result.body.reviews.forEach(review => {
                         expect(review).toMatchObject({
                             owner: expect.any(String),

@@ -49,7 +49,7 @@ exports.selectReviewComments = (review_id) => {
         });
 };
 exports.selectReviews = (queries) => {
-    const whereBox = [];
+    const dbQueries = [];
     //checks for validity using helper funcs
     const validQueries = validateReviewQueries(queries);
     const validPages = validatePagination(queries);
@@ -66,7 +66,7 @@ exports.selectReviews = (queries) => {
     //WHERE for category query
     if (category) {
         queryStr += ` WHERE reviews.category = $1`
-        whereBox.push(category);
+        dbQueries.push(category);
     }
     //group by added here to preserve correct order
     queryStr += ' GROUP BY reviews.review_id'
@@ -77,8 +77,8 @@ exports.selectReviews = (queries) => {
     const offset = (page - 1) * limit
     queryStr += ` LIMIT ${limit} OFFSET ${offset}`
     //query execution and rows passed back to controller
-    return db.query(queryStr + ';', whereBox).then(reviews => {
-        if (category && reviews.rows.length === 0) return Promise.reject({ status: 404, message: 'Nothing yet' });
+    return db.query(queryStr + ';', dbQueries).then(reviews => {
+        if (reviews.rows.length === 0) return Promise.reject({ status: 404, message: 'Nothing yet' });
         else return { totalcount: reviews.rows.length, reviews: reviews.rows };
     });
 };
@@ -108,6 +108,7 @@ exports.insertComment = (review_id, comment) => {
         });
 };
 exports.removeComment = (comment_id) => {
+    if (!comment_id.match(/^[0-9]+$/g)) return Promise.reject({ status: 400, message: 'invalid comment_id' })
     return db.query(`DELETE FROM comments WHERE comment_id = $1 RETURNING *`, [comment_id])
         .then(comment => {
             if (comment.rows.length === 0) return Promise.reject({ status: 404, message: 'no comment found' });
