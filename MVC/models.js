@@ -10,7 +10,9 @@ exports.selectEndpoints = () => {
         'GET-/api/reviews/:review_id/comments': 'an array of all comments for the review selected',
         'POST-/api/reviews/:review_id/comments': 'adds a comment to the review in the format { username: "username", body: "comment_body" }',
         'DELETE-/api/comments/:comment_id': 'deletes a comment by parametric comment_id',
-        'GET-/api/users': 'an array of username objects'
+        'PATCH-/api/comments/:comment_id': 'adds votes to selected comment',
+        'GET-/api/users': 'an array of username objects',
+        'GET-/api/user/username': 'a single user by username'
     }
 };
 exports.selectCategories = async () => {
@@ -70,9 +72,9 @@ exports.selectReviews = async (queries) => {
 exports.updateReviewVotes = async (review_id, newReview) => {
     const { inc_votes: votes } = newReview;
     const review = await db.query(`UPDATE reviews
-                     SET votes = votes + $1
-                     WHERE review_id = $2
-                     RETURNING *;`, [votes, review_id])
+                                   SET votes = votes + $1
+                                   WHERE review_id = $2
+                                   RETURNING *;`, [votes, review_id])
     if (review.rows.length === 0) return Promise.reject({ status: 404, message: 'review not found' })
     return review.rows[0];
 };
@@ -87,4 +89,13 @@ exports.removeComment = async (comment_id) => {
     const comment = await db.query(`DELETE FROM comments WHERE comment_id = $1 RETURNING *;`, [comment_id])
     if (comment.rows.length === 0) return Promise.reject({ status: 404, message: 'no comment found' });
     return;
+};
+exports.updateCommentVotes = async (comment_id, comment_body) => {
+    const { inc_votes: votes } = comment_body;
+    const updatedComment = await db.query(`UPDATE comments 
+                                          SET votes = $1 
+                                          WHERE comment_id = $2 
+                                          RETURNING *;`, [votes, comment_id])
+    if (updatedComment.rows.length === 0) return Promise.reject({ status: 404, message: 'comment not found' })
+    return updatedComment.rows[0];
 };

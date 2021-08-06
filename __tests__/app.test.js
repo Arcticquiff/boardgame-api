@@ -50,6 +50,51 @@ describe('/api', () => {
                         expect(result.body).toEqual({ message: "invalid parameter" });
                     });
                 });
+            })
+            describe('PATCH', () => {
+                test('201 - takes an object with inc_votes and responds with updated comment', () => {
+                    return request(app).patch('/api/comments/1').send({ inc_votes: 1 }).expect(201).then(result => {
+                        expect(result.body).toEqual({
+                            comment: {
+                                comment_id: 1,
+                                author: 'bainesface',
+                                review_id: 2,
+                                votes: 1,
+                                created_at: '2017-11-22T12:43:33.389Z',
+                                body: 'I loved this game too!'
+                            }
+                        });
+                    });
+                });
+                test('201 - ignores extra keys', () => {
+                    return request(app).patch('/api/comments/1').send({ inc_votes: 1, not_a_key: 1 }).expect(201).then(result => {
+                        expect(result.body).toEqual({
+                            comment: {
+                                comment_id: 1,
+                                author: 'bainesface',
+                                review_id: 2,
+                                votes: 1,
+                                created_at: '2017-11-22T12:43:33.389Z',
+                                body: 'I loved this game too!'
+                            }
+                        });
+                    });
+                });
+                test('404 - err if comment doesn\'t exist', () => {
+                    return request(app).patch('/api/comments/1000000').send({ inc_votes: 1 }).expect(404).then(result => {
+                        expect(result.body).toEqual({ message: 'comment not found' });
+                    });
+                });
+                test('400 - err if inc_votes key absent', () => {
+                    return request(app).patch('/api/comments/1').send({ not_a_key: 1 }).expect(400).then(result => {
+                        expect(result.body).toEqual({ message: "bad request" });
+                    });
+                });
+                test('400 - err if votes NAN', () => {
+                    return request(app).patch('/api/comments/1').send({ inc_votes: 'NAN' }).expect(400).then(result => {
+                        expect(result.body).toEqual({ message: "invalid parameter" });
+                    });
+                });
             });
         });
     });
