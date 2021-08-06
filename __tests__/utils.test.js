@@ -1,16 +1,16 @@
 const { categoryData, commentData, reviewData, userData } = require('../db/data/test-data/index');
 const { formatCategories, formatUsers, formatReviews, formatComments } = require('../db/utils/data-manipulation.js');
 //Review array is a file with the test reviews in the correct array format
-const reviewArray = require('../db/data/test-data/reviewsArray.js');
 
+const reviewArray = require('../db/data/test-data/reviewsArray.js');
 describe('formatCategories()', () => {
     it('takes an array of objects and returns the values in a nested array in the correct format', () => {
-        expect(formatCategories([{ slug: 'euro game', description: 'Abstact games that involve little luck' }])).toEqual([['euro game', 'Abstact games that involve little luck']]);
+        expect(formatCategories([{ slug: 'euro-game', description: 'Abstact games that involve little luck' }])).toEqual([['euro-game', 'Abstact games that involve little luck']]);
         expect(formatCategories(categoryData)).toEqual([
-            ['euro game', 'Abstact games that involve little luck'],
-            ['social deduction', "Players attempt to uncover each other's hidden role"],
+            ['euro-game', 'Abstact games that involve little luck'],
+            ['social-deduction', "Players attempt to uncover each other's hidden role"],
             ['dexterity', 'Games involving physical skill'],
-            ["children's games", 'Games suitable for children']])
+            ["children's-games", 'Games suitable for children']])
     });
     it('doesn\'t mutate original objects or array', () => {
         const input = categoryData;
@@ -73,7 +73,7 @@ describe('formatReviews()', () => {
             review_img_url:
                 'https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png',
             review_body: 'Farmyard fun!',
-            category: 'euro game',
+            category: 'euro-game',
             created_at: new Date(1610964020514),
             votes: 1
         }])).toEqual([[
@@ -82,7 +82,7 @@ describe('formatReviews()', () => {
             'mallionaire',
             'https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png',
             'Farmyard fun!',
-            'euro game',
+            'euro-game',
             new Date(1610964020514),
             1
         ]]);
