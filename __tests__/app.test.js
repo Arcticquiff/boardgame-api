@@ -62,7 +62,7 @@ describe('/api', () => {
                                 author: 'bainesface',
                                 review_id: 2,
                                 votes: 1,
-                                created_at: '2017-11-22T12:43:33.389Z',
+                                created_at: expect.any(String),
                                 body: 'I loved this game too!'
                             }
                         });
@@ -76,7 +76,7 @@ describe('/api', () => {
                                 author: 'bainesface',
                                 review_id: 2,
                                 votes: 1,
-                                created_at: '2017-11-22T12:43:33.389Z',
+                                created_at: expect.any(String),
                                 body: 'I loved this game too!'
                             }
                         });
@@ -190,7 +190,7 @@ describe('/api', () => {
                                 review_img_url:
                                     'https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png',
                                 category: 'social-deduction',
-                                created_at: '2021-01-18T10:01:41.251Z',
+                                created_at: expect.any(String),
                                 votes: 5,
                                 comment_count: "3"
                             });
@@ -201,7 +201,7 @@ describe('/api', () => {
                                 review_img_url:
                                     'https://images.pexels.com/photos/278888/pexels-photo-278888.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
                                 category: 'social-deduction',
-                                created_at: '2021-01-25T11:16:54.963Z',
+                                created_at: expect.any(String),
                                 votes: 9,
                                 comment_count: "0",
                                 review_id: 7
@@ -213,7 +213,6 @@ describe('/api', () => {
                     test('200 - if passed ASC will change the direction of the order', () => {
                         return Promise.all([request(app).get('/api/reviews?order_by=ASC').expect(200).then(result => {
                             expect(result.body.reviews[0].title).toEqual("Settlers of Catan: Don't Settle For Less");
-                            expect(result.body.reviews[0].created_at).toEqual("1970-01-10T02:08:38.400Z");
                         }), request(app).get('/api/reviews?order_by=ASC&&sort_by=title').expect(200).then(result => {
                             expect(result.body.reviews[0].title).toEqual("Agricola");
                         })]);
