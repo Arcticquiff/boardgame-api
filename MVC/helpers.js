@@ -12,10 +12,12 @@ exports.validatePagination = (queries) => {
     if (!page.match(/^[0-9]+$/g)) return false;
     return true;
 };
-exports.validateCategory = (queries) => {
+exports.checkCategory = (queries) => {
     const { category } = queries;
-    if (!['strategy', 'hidden-roles', 'dexterity', 'push-your-luck', 'roll-and-write', 'deck-building', 'engine-building', 'social deduction', undefined].includes(category)) return false
-    return true;
+    return db.query('SELECT * FROM categories WHERE slug = $1;', [category]).then(category => {
+        if (category.rows.length === 0) return false
+        return true;
+    })
 };
 exports.reviewExists = (review_id) => {
     return db.query('SELECT * FROM reviews WHERE review_id = $1;', [review_id]).then(review => {

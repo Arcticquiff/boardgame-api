@@ -189,7 +189,7 @@ describe('/api', () => {
                                 owner: 'bainesface',
                                 review_img_url:
                                     'https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png',
-                                category: 'social deduction',
+                                category: 'social-deduction',
                                 created_at: '2021-01-18T10:01:41.251Z',
                                 votes: 5,
                                 comment_count: "3"
@@ -200,7 +200,7 @@ describe('/api', () => {
                                 owner: 'mallionaire',
                                 review_img_url:
                                     'https://images.pexels.com/photos/278888/pexels-photo-278888.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
-                                category: 'social deduction',
+                                category: 'social-deduction',
                                 created_at: '2021-01-25T11:16:54.963Z',
                                 votes: 9,
                                 comment_count: "0",
@@ -221,7 +221,7 @@ describe('/api', () => {
                 });
                 describe('category', () => {
                     test('200 - will respond with only the rows matching the catagory in the query', () => {
-                        return Promise.all([request(app).get('/api/reviews?category=social deduction').expect(200).then(result => {
+                        return Promise.all([request(app).get('/api/reviews?category=social-deduction').expect(200).then(result => {
                             expect(result.body.reviews[0].title).toEqual("Mollit elit qui incididunt veniam occaecat cupidatat");
                             expect(result.body.reviews[1].title).toEqual("Dolor reprehenderit");
                         }), request(app).get('/api/reviews?category=dexterity').expect(200).then(result => {
@@ -229,7 +229,7 @@ describe('/api', () => {
                         })]);
                     });
                     test('200 - will respond with empty array if valid category but no reviews responds with empty array', () => {
-                        return request(app).get('/api/reviews?category=hidden-roles').expect(200).then(result => {
+                        return request(app).get("/api/reviews?category=children's-games").expect(200).then(result => {
                             expect(result.body.reviews).toEqual([]);
                         });
                     });

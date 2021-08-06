@@ -1,5 +1,5 @@
 const db = require('../db/connection');
-const { validateReviewQueries, validatePagination, validateCategory, reviewExists } = require('./helpers');
+const { validateReviewQueries, validatePagination, checkCategory, reviewExists } = require('./helpers');
 
 exports.selectEndpoints = () => {
     return {
@@ -49,7 +49,9 @@ exports.selectReviewComments = async (review_id) => {
 exports.selectReviews = async (queries) => {
     const dbQueries = [];
     if (!validateReviewQueries(queries) || !validatePagination(queries)) return Promise.reject({ status: 400, message: 'invalid query' });
-    if (!validateCategory(queries)) return Promise.reject({ status: 404, message: 'category not found' })
+    let validCategory = true;
+    if (queries.category) validCategory = await checkCategory(queries)
+    if (!validCategory) return Promise.reject({ status: 404, message: 'category not found' })
     const { sort_by = `created_at`, order_by = 'DESC', category, page = 1, limit = 5 } = queries;
     let queryStr = `SELECT reviews.review_id, reviews.title,
                     reviews.review_img_url, reviews.votes, reviews.category, 
