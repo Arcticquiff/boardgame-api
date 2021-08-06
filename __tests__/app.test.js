@@ -3,6 +3,7 @@ const testData = require('../db/data/test-data/index.js');
 const app = require('../app');
 const seed = require('../db/seeds/seed.js');
 const request = require('supertest');
+const { get } = require('../routers/categories.router.js');
 
 beforeEach(() => seed(testData));
 afterAll(() => db.end());
@@ -62,6 +63,26 @@ describe('/api', () => {
                             username: expect.any(String)
                         });
                     });
+                });
+            });
+        });
+        describe('/:username', () => {
+            describe('GET', () => {
+                test('200 - responds with a single user object', () => {
+                    return request(app).get('/api/users/bainesface').expect(200).then(result => {
+                        expect(result.body).toEqual({
+                            user: {
+                                username: expect.any(String),
+                                avatar_url: expect.any(String),
+                                name: expect.any(String)
+                            }
+                        });
+                    });
+                });
+                test('404 - username doesn\'t exist', () => {
+                    return request(app).get('/api/users/not_a_user').expect(404).then(result => {
+                        expect(result.body).toEqual({ "message": "user not found" });
+                    })
                 });
             });
         });

@@ -18,8 +18,13 @@ exports.selectCategories = async () => {
     return categories.rows;
 };
 exports.selectUsers = async () => {
-    const users = await db.query('SELECT username FROM users')
+    const users = await db.query('SELECT username FROM users;')
     return users.rows;
+};
+exports.selectUser = async (username) => {
+    const user = await db.query('SELECT * FROM users WHERE username = $1;', [username])
+    if (user.rows.length === 0) return Promise.reject({ status: 404, message: 'user not found' })
+    return user.rows[0];
 };
 exports.selectReview = async (review_id) => {
     const review = await db.query(`SELECT *, 
@@ -36,7 +41,7 @@ exports.selectReviewComments = async (review_id) => {
     if (!exists) return Promise.reject({ status: 404, message: 'review not found' })
     const comments = await db.query(`SELECT comment_id, author, votes, created_at, body
                      FROM comments
-                     WHERE comments.review_id = $1`, [review_id]);
+                     WHERE comments.review_id = $1;`, [review_id]);
     return comments.rows;
 };
 exports.selectReviews = async (queries) => {
@@ -79,7 +84,7 @@ exports.insertComment = async (review_id, comment) => {
     return insertedComment.rows[0];
 };
 exports.removeComment = async (comment_id) => {
-    const comment = await db.query(`DELETE FROM comments WHERE comment_id = $1 RETURNING *`, [comment_id])
+    const comment = await db.query(`DELETE FROM comments WHERE comment_id = $1 RETURNING *;`, [comment_id])
     if (comment.rows.length === 0) return Promise.reject({ status: 404, message: 'no comment found' });
     return;
 };
