@@ -25,10 +25,12 @@ describe('/api', () => {
                         'GET-/api/reviews': 'an array of reviews defaulted to limit=5&page=1',
                         'GET-/api/reviews/:review_id': 'a single review by parametric id num',
                         'PATCH-/api/reviews/:review_id': 'adds a number of votes to review in format { inc_votes: num_of_votes }',
+                        "PATCH-/api/comments/:comment_id": "adds votes to selected comment",
                         'GET-/api/reviews/:review_id/comments': 'an array of all comments for the review selected',
                         'POST-/api/reviews/:review_id/comments': 'adds a comment to the review in the format { username: "username", body: "comment_body" }',
                         'DELETE-/api/comments/:comment_id': 'deletes a comment by parametric comment_id',
-                        'GET-/api/users': 'an array of username objects'
+                        'GET-/api/users': 'an array of username objects',
+                        "GET-/api/user/username": "a single user by username"
                     }
                 });
             });
@@ -227,7 +229,7 @@ describe('/api', () => {
                         })]);
                     });
                     test('200 - will respond with empty array if valid category but no reviews responds with empty array', () => {
-                        return request(app).get('/api/reviews?category=hidden_roles').expect(200).then(result => {
+                        return request(app).get('/api/reviews?category=hidden-roles').expect(200).then(result => {
                             expect(result.body.reviews).toEqual([]);
                         });
                     });
