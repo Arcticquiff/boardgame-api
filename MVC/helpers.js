@@ -14,7 +14,7 @@ exports.validatePagination = (queries) => {
 };
 exports.validateCategory = (queries) => {
     const { category } = queries;
-    if (!['strategy', 'hidden-roles', 'dexterity', 'push-your-luck', 'roll-and-write', 'deck-building', 'engine-buidling', 'social deduction', undefined].includes(category)) return false
+    if (!['strategy', 'hidden-roles', 'dexterity', 'push-your-luck', 'roll-and-write', 'deck-building', 'engine-building', 'social deduction', undefined].includes(category)) return false
     return true;
 };
 exports.reviewExists = (review_id) => {
