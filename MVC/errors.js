@@ -1,5 +1,5 @@
 exports.incorrectPath = (req, res, next) => {
-    res.status(400).send({ message: 'incorrect path' });
+    res.status(400).send({ message: 'invalid path' });
 };
 exports.customErr = (err, req, res, next) => {
     if (err.status) {
@@ -7,7 +7,7 @@ exports.customErr = (err, req, res, next) => {
     } else if (err.code === '23503') {
         res.status(404).send({ message: err.message });
     } else if (err.code === '23502' || err.code === '22P02' || err.code === '23505') {
-        res.status(400).send({ message: err.message });
+        res.status(400).send({ message: 'missing or invalid value' });
     }
     else next(err);
 };

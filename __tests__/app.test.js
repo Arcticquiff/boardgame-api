@@ -9,9 +9,9 @@ afterAll(() => db.end());
 
 describe('/api', () => {
     describe('ANY', () => {
-        test('400 - responds with message if incorrect request path', () => {
+        test('400 - responds with message if invalid request path', () => {
             return request(app).get('/api/not_a_path').expect(400).then(result => {
-                expect(result.body.message).toEqual('incorrect path');
+                expect(result.body.message).toEqual('invalid path');
             });
         });
     });
@@ -51,7 +51,7 @@ describe('/api', () => {
                 });
                 test('400 responds with err if invalid comment param', () => {
                     return request(app).delete('/api/comments/not_a_param').expect(400).then(result => {
-                        expect(result.body).toEqual({ message: "invalid input syntax for type integer: \"not_a_param\"" });
+                        expect(result.body).toEqual({ message: 'missing or invalid value' });
                     });
                 });
             })
@@ -91,12 +91,12 @@ describe('/api', () => {
                 });
                 test('400 - err if inc_votes key absent', () => {
                     return request(app).patch('/api/comments/1').send({ not_a_key: 1 }).expect(400).then(result => {
-                        expect(result.body).toEqual({ message: "null value in column \"votes\" violates not-null constraint" });
+                        expect(result.body).toEqual({ message: 'missing or invalid value' });
                     });
                 });
                 test('400 - err if votes NAN', () => {
                     return request(app).patch('/api/comments/1').send({ inc_votes: 'NAN' }).expect(400).then(result => {
-                        expect(result.body).toEqual({ message: "invalid input syntax for type integer: \"NAN\"" });
+                        expect(result.body).toEqual({ message: 'missing or invalid value' });
                     });
                 });
             });
@@ -166,7 +166,7 @@ describe('/api', () => {
             });
             test('400 - responds with err if category slug already exists', () => {
                 return request(app).post('/api/categories').send({ slug: 'dexterity', description: 'a game that has cards' }).expect(400).then(result => {
-                    expect(result.body).toEqual({ "message": "duplicate key value violates unique constraint \"categories_pkey\"" });
+                    expect(result.body).toEqual({ "message": 'missing or invalid value' });
                 });
             });
         });
@@ -194,7 +194,7 @@ describe('/api', () => {
             test('201 - ignores extra keys', () => {
                 return request(app).post('/api/reviews').send({ owner: 'bainesface', title: 'this is a review', review_body: 'great good amazing who knew', designer: 'game_maker', category: 'dexterity', not_a_key: 1 }).expect(201);
             });
-            test('400 - responds with err if incorrect keys', () => {
+            test('400 - responds with err if invalid keys', () => {
                 return request(app).post('/api/reviews').send({ not_a_key: 'bainesface', title: 'this is a review', review_body: 'great good amazing who knew', designer: 'game_maker', category: 'dexterity' }).expect(400).then(result => {
                     expect(result.body).toEqual({ message: 'invalid or missing key on review object' });
                 })
@@ -313,7 +313,7 @@ describe('/api', () => {
                 });
                 test('400 - respond with err if invalid param', () => {
                     return request(app).delete('/api/reviews/not_a_param').expect(400).then(result => {
-                        expect(result.body).toEqual({ "message": "invalid input syntax for type integer: \"not_a_param\"" });
+                        expect(result.body).toEqual({ "message": 'missing or invalid value' });
                     });
                 });
                 test('404 - respond with err if review doesn\'t exist', () => {
@@ -341,7 +341,7 @@ describe('/api', () => {
                 });
                 test('400 - if invalid review_id param responds with err message', () => {
                     return request(app).get('/api/reviews/not_a_vailid_param').expect(400).then(result => {
-                        expect(result.body.message).toEqual("invalid input syntax for type integer: \"not_a_vailid_param\"");
+                        expect(result.body.message).toEqual('missing or invalid value');
                     });
                 });
                 test('404 - if param is valid but review_id doesn\'t exist respond with err message', () => {
@@ -367,7 +367,7 @@ describe('/api', () => {
                     });
                 });
                 test('201 - if object includes correct key, but has too many keys ignores extra keys and responds', () => {
-                    return request(app).patch('/api/reviews/1').send({ inc_votes: 1, incorrect_key: 1 }).expect(201).then(result => {
+                    return request(app).patch('/api/reviews/1').send({ inc_votes: 1, invalid_key: 1 }).expect(201).then(result => {
                         expect(result.body.updatedReview).toMatchObject({
                             owner: expect.any(String),
                             title: expect.any(String),
@@ -383,17 +383,17 @@ describe('/api', () => {
                 });
                 test('400 - if invalid review_id param responds with err message', () => {
                     return request(app).patch('/api/reviews/not_a_vailid_param').send({ inc_votes: 1 }).expect(400).then(result => {
-                        expect(result.body.message).toEqual("invalid input syntax for type integer: \"not_a_vailid_param\"");
+                        expect(result.body.message).toEqual('missing or invalid value');
                     });
                 });
                 test('400 - if object does not have correct key responds with err message', () => {
-                    return request(app).patch('/api/reviews/1').send({ incorrect_key: 1 }).expect(400).then(result => {
-                        expect(result.body.message).toEqual("null value in column \"votes\" violates not-null constraint");
+                    return request(app).patch('/api/reviews/1').send({ invalid_key: 1 }).expect(400).then(result => {
+                        expect(result.body.message).toEqual('missing or invalid value');
                     });
                 });
                 test('400 - if inc_votes is not a number responds with err', () => {
                     return request(app).patch('/api/reviews/1').send({ inc_votes: 'NAN' }).expect(400).then(result => {
-                        expect(result.body.message).toEqual("invalid input syntax for type integer: \"NAN\"");
+                        expect(result.body.message).toEqual('missing or invalid value');
                     });
                 });
                 test('404 - if param is valid but review_id doesn\'t exist respond with err message', () => {
@@ -430,7 +430,7 @@ describe('/api', () => {
                     });
                     test('400 - if invalid review_id param responds with err message', () => {
                         return request(app).get('/api/reviews/not_a_vailid_param/comments').expect(400).then(result => {
-                            expect(result.body.message).toEqual("invalid input syntax for type integer: \"not_a_vailid_param\"");
+                            expect(result.body.message).toEqual('missing or invalid value');
                         });
                     });
                     test('404 - if param is valid but review_id doesn\'t exist respond with err message', () => {
@@ -471,12 +471,12 @@ describe('/api', () => {
                     });
                     test('400 - if invalid review_id param responds with err message', () => {
                         return request(app).post('/api/reviews/not_a_vailid_param/comments').send({ username: 'bainesface', body: 'good game' }).expect(400).then(result => {
-                            expect(result.body).toEqual({ message: "invalid input syntax for type integer: \"not_a_vailid_param\"" });
+                            expect(result.body).toEqual({ message: 'missing or invalid value' });
                         });
                     });
-                    test('400 - if incorrect key will return err message', () => {
+                    test('400 - if invalid key will return err message', () => {
                         return request(app).post('/api/reviews/1/comments').send({ not_a_key: 'bainesface', body: 'good game' }).expect(400).then(result => {
-                            expect(result.body).toEqual({ message: "null value in column \"author\" violates not-null constraint" });
+                            expect(result.body).toEqual({ message: 'missing or invalid value' });
                         });
                     });
                     test('404 - if username does not exist will return err message', () => {
