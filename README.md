@@ -1,56 +1,55 @@
-# Welcome to my board game review API!
+<h1 align="center">Welcome to TP-boardgame-reviews 👋</h1>
+<p>
+  <img alt="Version" src="https://img.shields.io/badge/version-Node 16.5.0, Postgres 7.19.1-blue.svg?cacheSeconds=2592000" />
+  <a href="https://github.com/northcoders/be-nc-games#readme" target="_blank">
+    <img alt="Documentation" src="https://img.shields.io/badge/documentation-yes-brightgreen.svg" />
+  </a>
+  <a href="https://github.com/northcoders/be-nc-games/graphs/commit-activity" target="_blank">
+    <img alt="Maintenance" src="https://img.shields.io/badge/Maintained%3F-yes-green.svg" />
+  </a>
+</p>
 
-https://tp-boardgame-api.herokuapp.com/
+> Hi welcome to my boardgame api! This makes use of express and postgreSQL with node.js to create an interactive site with multiple endpoints, feel free to have a look around!
 
-This project is a fairly straight-forward look at a database API, feel free to have a look around!
+### 🏠 [Homepage](https://github.com/Arcticquiff/boardgame-api)
 
-This project was made on node version:
-> 16.5.0
+### ✨ [Demo](https://tp-boardgame-api.herokuapp.com/)
 
-and Postgres version:
-> 7.19.1
-
----
 ## Setup
 
----
-### Dependencies:
+You will need to run the following commands:
 
-You will need the following node packages:
+```sh
+npm i
+npm i jest -D
+npm i supertest -D
+npm i express
+npm i pg
+npm i pg-format
+npm i dotenv
+```
+Then create two .env files inside the envfiles folder with the following inside:
 
-- Jest
-> npm i jest -D
-- Supertest
-> npm i supertest -D
-- dotenv
-> npm i dotenv
-- express
-> npm i express
-- postgresql
-> npm i pg
-- pg-format
-> npm i pg-format 
----
-### Initialising the database
-Inside the 'envFiles' folder you will need to create two files:
-> .env.development
+```sh
+PGDATABASE=your_database_here
+```
 
-> .env.test
+## Run tests
 
-thes files will determine which database (test or development) you are connected to, inside these files will need to be the following:
-> PGDATABASE=your_database_here
+```sh
+npm t
+```
 
-> PGDATABASE=your_database_here_test
+## Author
 
-Next run these commands next to setup the databases:
+👤 **Tom Platt**
 
-> npm run setup-dbs
+* Github: [@Arcticquiff](https://github.com/Arcticquiff)
+* LinkedIn: [@TomPlatt](https://linkedin.com/in/tom-platt-513779211)
 
-> npm run seed
+## Show your support
 
-and your database should be seeded with the test data.
+Give a ⭐️ if this project helped you!
 
-to run tests on the test data type the following command:
-> npm t app
-
----
+***
+_This README was generated with ❤️ by [readme-md-generator](https://github.com/kefranabg/readme-md-generator)_
