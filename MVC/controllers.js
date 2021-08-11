@@ -1,4 +1,4 @@
-const { selectCategories, selectReview, updateReviewVotes, selectReviews, selectReviewComments, insertComment, selectEndpoints, removeComment, selectUsers, selectUser, updateCommentVotes, insertReview, insertCategory } = require('./models');
+const { selectCategories, selectReview, updateReviewVotes, selectReviews, selectReviewComments, insertComment, selectEndpoints, removeComment, selectUsers, selectUser, updateCommentVotes, insertReview, insertCategory, removeReview } = require('./models');
 
 exports.getEndpoints = (req, res, next) => {
     res.send({ endpoints: selectEndpoints() });
@@ -61,5 +61,10 @@ exports.deleteComment = (req, res, next) => {
 exports.patchComment = (req, res, next) => {
     return updateCommentVotes(req.params.comment_id, req.body).then(comment => {
         res.status(201).send({ comment });
+    }).catch(err => next(err));
+};
+exports.deleteReview = (req, res, next) => {
+    return removeReview(req.params.review_id).then(() => {
+        res.status(204).send();
     }).catch(err => next(err));
 };

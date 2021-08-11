@@ -112,6 +112,11 @@ exports.removeComment = async (comment_id) => {
     if (comment.rows.length === 0) return Promise.reject({ status: 404, message: 'no comment found' });
     return;
 };
+exports.removeReview = async (review_id) => {
+    const review = await db.query(`DELETE FROM reviews WHERE review_id = $1 RETURNING *;`, [review_id])
+    if (review.rows.length === 0) return Promise.reject({ status: 404, message: 'no review found' });
+    return;
+};
 exports.updateCommentVotes = async (comment_id, comment_body) => {
     const { inc_votes: votes } = comment_body;
     const updatedComment = await db.query(`UPDATE comments 

@@ -48,7 +48,7 @@ describe('/api', () => {
                         expect(result.body).toEqual({ message: 'no comment found' });
                     });
                 });
-                test('400 responds with err if invail comment param', () => {
+                test('400 responds with err if invalid comment param', () => {
                     return request(app).delete('/api/comments/not_a_param').expect(400).then(result => {
                         expect(result.body).toEqual({ message: "invalid input syntax for type integer: \"not_a_param\"" });
                     });
@@ -306,6 +306,21 @@ describe('/api', () => {
             });
         });
         describe('/:review_id', () => {
+            describe('DELETE', () => {
+                test('204 - responds with only status code', () => {
+                    return request(app).delete('/api/reviews/1').expect(204)
+                });
+                test('400 - respond with err if invalid param', () => {
+                    return request(app).delete('/api/reviews/not_a_param').expect(400).then(result => {
+                        expect(result.body).toEqual({ "message": "invalid input syntax for type integer: \"not_a_param\"" });
+                    });
+                });
+                test('404 - respond with err if review doesn\'t exist', () => {
+                    return request(app).delete('/api/reviews/10000000').expect(404).then(result => {
+                        expect(result.body).toEqual({ message: 'no review found' });
+                    });
+                });
+            });
             describe('GET', () => {
                 test('200 - responds with an object with a key of "review" and a value of the review object', () => {
                     return request(app).get('/api/reviews/2').expect(200).then(result => {
