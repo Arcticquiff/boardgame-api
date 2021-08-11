@@ -1,5 +1,5 @@
 const db = require('../db/connection');
-const { validateReviewQueries, validatePagination, checkCategory, reviewExists, validateReviewKeys, formatReviewData } = require('./helpers');
+const { validateReviewQueries, validatePagination, checkCategory, reviewExists, validateReviewKeys, formatReviewData, validateCategoryKeys } = require('./helpers');
 
 exports.selectEndpoints = () => {
     return {
@@ -91,13 +91,21 @@ exports.insertComment = async (review_id, comment) => {
     return insertedComment.rows[0];
 };
 exports.insertReview = async (review) => {
-    if (!validateReviewKeys(review)) return Promise.reject({ status: 400, message: 'invalid key on review object' });
+    if (!validateReviewKeys(review)) return Promise.reject({ status: 400, message: 'invalid or missing key on review object' });
     const insertedReview = await db.query(`INSERT INTO reviews
                                             (title, review_body, owner, designer, category)
                                             VALUES
                                             ($1, $2, $3, $4, $5) RETURNING *`, formatReviewData(review));
     insertedReview.rows[0].comment_count = 0;
     return insertedReview.rows[0];
+};
+exports.insertCategory = async (category) => {
+    if (!validateCategoryKeys(category)) return Promise.reject({ status: 400, message: 'invalid or missing key on category object' });
+    const insertedCategory = await db.query(`INSERT INTO categories
+                                             (slug, description)
+                                             VALUES
+                                             ($1, $2) RETURNING *`, [category.slug, category.description]);
+    return insertedCategory.rows[0];
 };
 exports.removeComment = async (comment_id) => {
     const comment = await db.query(`DELETE FROM comments WHERE comment_id = $1 RETURNING *;`, [comment_id])

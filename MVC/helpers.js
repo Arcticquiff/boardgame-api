@@ -42,3 +42,11 @@ exports.validateReviewKeys = (review) => {
 exports.formatReviewData = (review) => {
     return [review.title, review.review_body, review.owner, review.designer, review.category];
 };
+exports.validateCategoryKeys = (category) => {
+    if (Object.keys(category).length < 2) return false;
+    let valid = true;
+    ['slug', 'description'].forEach(key => {
+        if (!Object.keys(category).includes(key)) valid = false;
+    });
+    return valid;
+};

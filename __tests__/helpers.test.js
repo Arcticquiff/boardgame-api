@@ -1,4 +1,4 @@
-const { validateReviewQueries, validatePagination, validateReviewKeys, formatReviewData } = require('../MVC/helpers');
+const { validateReviewQueries, validatePagination, validateReviewKeys, formatReviewData, validateCategoryKeys } = require('../MVC/helpers');
 
 describe('validateReviewQueries()', () => {
     test('returns true as a base when passed an object', () => {
@@ -53,5 +53,24 @@ describe('formatReviewData()', () => {
         const input = { review_body: 1, title: 2, owner: 3, designer: 4, category: 5 };
         formatReviewData(input);
         expect(input).toEqual({ review_body: 1, title: 2, owner: 3, designer: 4, category: 5 });
+    });
+});
+describe('validateCategoryKeys()', () => {
+    test('returns false if passed less than 2 keys', () => {
+        expect(validateCategoryKeys({})).toBe(false);
+    });
+    test('returns false if passed any incorrect key', () => {
+        expect(validateCategoryKeys({ not_a_key: 1, description: 1 })).toBe(false);
+    });
+    test('returns true if passed correct keys', () => {
+        expect(validateCategoryKeys({ slug: 1, description: 1 })).toEqual(true);
+    });
+    test('returns true if passes correct keys and extra', () => {
+        expect(validateCategoryKeys({ slug: 1, description: 1, not_a_key: 1 })).toEqual(true);
+    });
+    test('doesn\'t mutate original object', () => {
+        const input = { slug: 1, description: 1 };
+        validateCategoryKeys(input);
+        expect(input).toEqual({ slug: 1, description: 1 });
     });
 });
