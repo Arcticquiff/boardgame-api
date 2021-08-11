@@ -24,7 +24,7 @@ exports.getReviews = (req, res, next) => {
     }).catch(err => next(err));
 };
 exports.getReviewComments = (req, res, next) => {
-    return selectReviewComments(req.params.review_id).then(comments => {
+    return selectReviewComments(req.params.review_id, req.query).then(comments => {
         res.send({ comments });
     }).catch(err => next(err));
 };

@@ -26,7 +26,7 @@ describe('/api', () => {
                         'GET-/api/reviews/:review_id': 'a single review by parametric id num',
                         'PATCH-/api/reviews/:review_id': 'adds a number of votes to review in format { inc_votes: num_of_votes }',
                         "PATCH-/api/comments/:comment_id": "adds votes to selected comment",
-                        'GET-/api/reviews/:review_id/comments': 'an array of all comments for the review selected',
+                        'GET-/api/reviews/:review_id/comments': 'an array of all comments for the review selected defaulted to limit=5&page=1',
                         'POST-/api/reviews/:review_id/comments': 'adds a comment to the review in the format { username: "username", body: "comment_body" }',
                         'DELETE-/api/comments/:comment_id': 'deletes a comment by parametric comment_id',
                         'GET-/api/users': 'an array of username objects',
@@ -355,6 +355,9 @@ describe('/api', () => {
                             expect(result.body.comments).toEqual([]);
                         });
                     });
+                    test('200 - accepts pagination queries', () => {
+                        return request(app).get('/api/reviews/1/comments?limit=10&page=2').expect(200)
+                    });
                     test('400 - if invalid review_id param responds with err message', () => {
                         return request(app).get('/api/reviews/not_a_vailid_param/comments').expect(400).then(result => {
                             expect(result.body.message).toEqual("invalid parameter");
@@ -363,6 +366,11 @@ describe('/api', () => {
                     test('404 - if param is valid but review_id doesn\'t exist respond with err message', () => {
                         return request(app).get('/api/reviews/1000000/comments').expect(404).then(result => {
                             expect(result.body.message).toEqual('review not found');
+                        });
+                    });
+                    test('400 - if pagination invalid respond with err', () => {
+                        return request(app).get('/api/reviews/1/comments?limit=banana').expect(400).then(result => {
+                            expect(result.body).toEqual({ message: 'invalid query' });
                         });
                     });
                 });

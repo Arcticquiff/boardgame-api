@@ -9,7 +9,7 @@
   </a>
 </p>
 
-> Hi welcome to my boardgame api! This makes use of express and postgreSQL with node.js to create an interactive site with multiple endpoints, feel free to have a look around!
+> Hi welcome to my boardgame api! This makes use of express and postgreSQL with node.js to create an interactive site that has multiple endpoints, feel free to have a look around!
 
 ### 🏠 [Homepage](https://github.com/Arcticquiff/boardgame-api)
 

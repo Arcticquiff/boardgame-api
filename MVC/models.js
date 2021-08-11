@@ -7,7 +7,7 @@ exports.selectEndpoints = () => {
         'GET-/api/reviews': 'an array of reviews defaulted to limit=5&page=1',
         'GET-/api/reviews/:review_id': 'a single review by parametric id num',
         'PATCH-/api/reviews/:review_id': 'adds a number of votes to review in format { inc_votes: num_of_votes }',
-        'GET-/api/reviews/:review_id/comments': 'an array of all comments for the review selected',
+        'GET-/api/reviews/:review_id/comments': 'an array of all comments for the review selected defaulted to limit=5&page=1',
         'POST-/api/reviews/:review_id/comments': 'adds a comment to the review in the format { username: "username", body: "comment_body" }',
         'DELETE-/api/comments/:comment_id': 'deletes a comment by parametric comment_id',
         'PATCH-/api/comments/:comment_id': 'adds votes to selected comment',
@@ -38,12 +38,16 @@ exports.selectReview = async (review_id) => {
     if (review.rows.length === 0) return Promise.reject({ status: 404, message: 'review not found' })
     return review.rows[0];
 };
-exports.selectReviewComments = async (review_id) => {
+exports.selectReviewComments = async (review_id, queries) => {
+    if (!validatePagination(queries)) return Promise.reject({ status: 400, message: 'invalid query' });
+    const { limit = 5, page = 1 } = queries;
+    const offset = (page - 1) * limit
     const exists = await reviewExists(review_id);
     if (!exists) return Promise.reject({ status: 404, message: 'review not found' })
     const comments = await db.query(`SELECT comment_id, author, votes, created_at, body
                      FROM comments
-                     WHERE comments.review_id = $1;`, [review_id]);
+                     WHERE comments.review_id = $1
+                     LIMIT ${limit} OFFSET ${offset};`, [review_id]);
     return comments.rows;
 };
 exports.selectReviews = async (queries) => {
