@@ -23,6 +23,7 @@ describe('/api', () => {
                     endpoints: {
                         'GET-/api/categories': 'an array of all the categories and a short description',
                         'GET-/api/reviews': 'an array of reviews defaulted to limit=5&page=1',
+                        'POST-/api/reviews': "add a review to the database in format { owner, title, review_body, designer, category }",
                         'GET-/api/reviews/:review_id': 'a single review by parametric id num',
                         'PATCH-/api/reviews/:review_id': 'adds a number of votes to review in format { inc_votes: num_of_votes }',
                         "PATCH-/api/comments/:comment_id": "adds votes to selected comment",
@@ -150,6 +151,39 @@ describe('/api', () => {
         });
     });
     describe('/reviews', () => {
+        describe('POST', () => {
+            test('201 - responds with added review object', () => {
+                return request(app).post('/api/reviews').send({ owner: 'bainesface', title: 'this is a review', review_body: 'great good amazing who knew', designer: 'game_maker', category: 'dexterity' }).expect(201).then(result => {
+                    expect(result.body).toEqual({
+                        review: {
+                            review_id: 14,
+                            title: 'this is a review',
+                            review_body: 'great good amazing who knew',
+                            designer: 'game_maker',
+                            review_img_url: 'https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg',
+                            votes: 0,
+                            category: 'dexterity',
+                            owner: 'bainesface',
+                            created_at: expect.any(String),
+                            comment_count: 0
+                        }
+                    });
+                });
+            });
+            test('201 - ignores extra keys', () => {
+                return request(app).post('/api/reviews').send({ owner: 'bainesface', title: 'this is a review', review_body: 'great good amazing who knew', designer: 'game_maker', category: 'dexterity', not_a_key: 1 }).expect(201);
+            });
+            test('400 - responds with err if incorrect keys', () => {
+                return request(app).post('/api/reviews').send({ not_a_key: 'bainesface', title: 'this is a review', review_body: 'great good amazing who knew', designer: 'game_maker', category: 'dexterity' }).expect(400).then(result => {
+                    expect(result.body).toEqual({ message: 'invalid key on review object' });
+                })
+            });
+            test('404 - responds with err if any value does not follow table constraint', () => {
+                return request(app).post('/api/reviews').send({ owner: 'not_a_username', title: 'this is a review', review_body: 'great good amazing who knew', designer: 'game_maker', category: 'dexterity' }).expect(404).then(result => {
+                    expect(result.body).toEqual({ "message": "not found" });
+                })
+            });
+        });
         describe('GET', () => {
             test('200 - responds with an array of review objects', () => {
                 return request(app).get('/api/reviews').expect(200).then(result => {

@@ -31,3 +31,14 @@ exports.checkUser = (username) => {
         return true;
     })
 };
+exports.validateReviewKeys = (review) => {
+    if (Object.keys(review).length < 5) return false;
+    let valid = true;
+    ['review_body', 'title', 'owner', 'designer', 'category'].forEach(key => {
+        if (!Object.keys(review).includes(key)) valid = false;
+    });
+    return valid;
+};
+exports.formatReviewData = (review) => {
+    return [review.title, review.review_body, review.owner, review.designer, review.category];
+};

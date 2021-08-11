@@ -1,10 +1,11 @@
 const db = require('../db/connection');
-const { validateReviewQueries, validatePagination, checkCategory, reviewExists } = require('./helpers');
+const { validateReviewQueries, validatePagination, checkCategory, reviewExists, validateReviewKeys, formatReviewData } = require('./helpers');
 
 exports.selectEndpoints = () => {
     return {
         'GET-/api/categories': 'an array of all the categories and a short description',
         'GET-/api/reviews': 'an array of reviews defaulted to limit=5&page=1',
+        'POST-/api/reviews': "add a review to the database in format { owner, title, review_body, designer, category }",
         'GET-/api/reviews/:review_id': 'a single review by parametric id num',
         'PATCH-/api/reviews/:review_id': 'adds a number of votes to review in format { inc_votes: num_of_votes }',
         'GET-/api/reviews/:review_id/comments': 'an array of all comments for the review selected defaulted to limit=5&page=1',
@@ -88,6 +89,15 @@ exports.insertComment = async (review_id, comment) => {
                                             VALUES 
                                             ($1, $2, $3) RETURNING *;`, [review_id, comment.username, comment.body])
     return insertedComment.rows[0];
+};
+exports.insertReview = async (review) => {
+    if (!validateReviewKeys(review)) return Promise.reject({ status: 400, message: 'invalid key on review object' });
+    const insertedReview = await db.query(`INSERT INTO reviews
+                                            (title, review_body, owner, designer, category)
+                                            VALUES
+                                            ($1, $2, $3, $4, $5) RETURNING *`, formatReviewData(review));
+    insertedReview.rows[0].comment_count = 0;
+    return insertedReview.rows[0];
 };
 exports.removeComment = async (comment_id) => {
     const comment = await db.query(`DELETE FROM comments WHERE comment_id = $1 RETURNING *;`, [comment_id])
