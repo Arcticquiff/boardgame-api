@@ -3,7 +3,6 @@ const testData = require('../db/data/test-data/index.js');
 const app = require('../app');
 const seed = require('../db/seeds/seed.js');
 const request = require('supertest');
-const { get } = require('../routers/categories.router.js');
 
 beforeEach(() => seed(testData));
 afterAll(() => db.end());
@@ -22,9 +21,11 @@ describe('/api', () => {
                 expect(result.body).toEqual({
                     endpoints: {
                         'GET-/api/categories': 'an array of all the categories and a short description',
+                        'POST-/api/categories': 'adds a new category in the format {slug, description}',
                         'GET-/api/reviews': 'an array of reviews defaulted to limit=5&page=1',
                         'POST-/api/reviews': "add a review to the database in format { owner, title, review_body, designer, category }",
                         'GET-/api/reviews/:review_id': 'a single review by parametric id num',
+                        'DELETE-/api/reviews/:review_id': 'deletes single review by parametric id num',
                         'PATCH-/api/reviews/:review_id': 'adds a number of votes to review in format { inc_votes: num_of_votes }',
                         "PATCH-/api/comments/:comment_id": "adds votes to selected comment",
                         'GET-/api/reviews/:review_id/comments': 'an array of all comments for the review selected defaulted to limit=5&page=1',
