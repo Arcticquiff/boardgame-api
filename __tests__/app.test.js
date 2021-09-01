@@ -63,7 +63,7 @@ describe('/api', () => {
                                 comment_id: 1,
                                 author: 'bainesface',
                                 review_id: 2,
-                                votes: 1,
+                                votes: 17,
                                 created_at: expect.any(String),
                                 body: 'I loved this game too!'
                             }
@@ -77,7 +77,7 @@ describe('/api', () => {
                                 comment_id: 1,
                                 author: 'bainesface',
                                 review_id: 2,
-                                votes: 1,
+                                votes: 17,
                                 created_at: expect.any(String),
                                 body: 'I loved this game too!'
                             }
