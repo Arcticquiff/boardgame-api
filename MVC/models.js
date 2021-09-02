@@ -50,6 +50,7 @@ exports.selectReviewComments = async (review_id, queries) => {
     const comments = await db.query(`SELECT comment_id, author, votes, created_at, body
                      FROM comments
                      WHERE comments.review_id = $1
+                     ORDER BY created_at DESC
                      LIMIT ${limit} OFFSET ${offset};`, [review_id]);
     return comments.rows;
 };
