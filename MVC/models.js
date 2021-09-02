@@ -72,9 +72,8 @@ exports.selectReviews = async (queries) => {
     queryStr += ` ORDER BY reviews.${sort_by}`;
     if (order_by === 'DESC') queryStr += ` ${order_by}`;
     const offset = (page - 1) * limit
-    queryStr += ` LIMIT ${limit} OFFSET ${offset}`
-    const reviews = await db.query(queryStr + ';', dbQueries)
-    return { totalcount: reviews.rows.length, reviews: reviews.rows };
+    const reviewData = await Promise.all([db.query(queryStr + ';', dbQueries), db.query(queryStr + ` LIMIT ${limit} OFFSET ${offset};`, dbQueries)])
+    return { totalcount: reviewData[0].rows.length, reviews: reviewData[1].rows };
 };
 exports.updateReviewVotes = async (review_id, newReview) => {
     const { inc_votes: votes } = newReview;

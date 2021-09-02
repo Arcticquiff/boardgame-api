@@ -234,6 +234,11 @@ describe('/api', () => {
                             expect(result.body.reviews[0].title).toEqual("Proident tempor et.");
                         })]);
                     });
+                    test('200 - passes back total number of rows before pagination', () => {
+                        return request(app).get('/api/reviews?limit=3&page=2').expect(200).then(result => {
+                            expect(result.body.total_count).toBe(13)
+                        })
+                    });
                 });
                 describe('sort_by', () => {
                     test('200 - takes a column name and orders it by that column defaulting to date', () => {
