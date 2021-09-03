@@ -34,10 +34,10 @@ describe('validateReviewKeys()', () => {
         expect(validateReviewKeys({ review_body: 1, title: 1, owner: 1, designer: 1, not_a_key: 1 })).toBe(false);
     });
     test('returns true if passed correct keys', () => {
-        expect(validateReviewKeys({ review_body: 1, title: 1, owner: 1, designer: 1, category: 1 })).toEqual(true);
+        expect(validateReviewKeys({ review_body: 1, title: 1, owner: 1, designer: 1, category: 1, review_img_url: 1 })).toEqual(true);
     });
     test('returns true if passes correct keys and extra', () => {
-        expect(validateReviewKeys({ review_body: 1, title: 1, owner: 1, designer: 1, category: 1, not_a_key: 1 })).toEqual(true);
+        expect(validateReviewKeys({ review_body: 1, title: 1, owner: 1, designer: 1, category: 1, review_img_url: 1, not_a_key: 1 })).toEqual(true);
     });
     test('doesn\'t mutate original object', () => {
         const input = { review_body: 1, title: 1, owner: 1, designer: 1, category: 1 };
@@ -47,7 +47,7 @@ describe('validateReviewKeys()', () => {
 });
 describe('formatReviewData()', () => {
     test('when passed an object with the correct keys returns an array in the correct order', () => {
-        expect(formatReviewData({ review_body: 1, title: 2, owner: 3, designer: 4, category: 5 })).toEqual([2, 1, 3, 4, 5]);
+        expect(formatReviewData({ review_body: 1, title: 2, owner: 3, designer: 4, category: 5, review_img_url: 6 })).toEqual([2, 1, 3, 4, 5, 6]);
     });
     test('doesn\'t mutate original object', () => {
         const input = { review_body: 1, title: 2, owner: 3, designer: 4, category: 5 };

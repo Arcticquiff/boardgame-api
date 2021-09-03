@@ -174,7 +174,7 @@ describe('/api', () => {
     describe('/reviews', () => {
         describe('POST', () => {
             test('201 - responds with added review object', () => {
-                return request(app).post('/api/reviews').send({ owner: 'bainesface', title: 'this is a review', review_body: 'great good amazing who knew', designer: 'game_maker', category: 'dexterity' }).expect(201).then(result => {
+                return request(app).post('/api/reviews').send({ owner: 'bainesface', title: 'this is a review', review_body: 'great good amazing who knew', designer: 'game_maker', category: 'dexterity', review_img_url: null }).expect(201).then(result => {
                     expect(result.body).toEqual({
                         review: {
                             review_id: 14,
@@ -192,15 +192,15 @@ describe('/api', () => {
                 });
             });
             test('201 - ignores extra keys', () => {
-                return request(app).post('/api/reviews').send({ owner: 'bainesface', title: 'this is a review', review_body: 'great good amazing who knew', designer: 'game_maker', category: 'dexterity', not_a_key: 1 }).expect(201);
+                return request(app).post('/api/reviews').send({ owner: 'bainesface', title: 'this is a review', review_body: 'great good amazing who knew', designer: 'game_maker', category: 'dexterity', review_img_url: null, not_a_key: 1 }).expect(201);
             });
             test('400 - responds with err if invalid keys', () => {
-                return request(app).post('/api/reviews').send({ not_a_key: 'bainesface', title: 'this is a review', review_body: 'great good amazing who knew', designer: 'game_maker', category: 'dexterity' }).expect(400).then(result => {
+                return request(app).post('/api/reviews').send({ not_a_key: 'bainesface', title: 'this is a review', review_body: 'great good amazing who knew', designer: 'game_maker', category: 'dexterity', review_img_url: null }).expect(400).then(result => {
                     expect(result.body).toEqual({ message: 'invalid or missing key on review object' });
                 })
             });
             test('404 - responds with err if any value does not follow table constraint', () => {
-                return request(app).post('/api/reviews').send({ owner: 'not_a_username', title: 'this is a review', review_body: 'great good amazing who knew', designer: 'game_maker', category: 'dexterity' }).expect(404).then(result => {
+                return request(app).post('/api/reviews').send({ owner: 'not_a_username', title: 'this is a review', review_body: 'great good amazing who knew', designer: 'game_maker', category: 'dexterity', review_img_url: null }).expect(404).then(result => {
                     expect(result.body).toEqual({ "message": "insert or update on table \"reviews\" violates foreign key constraint \"reviews_owner_fkey\"" });
                 })
             });

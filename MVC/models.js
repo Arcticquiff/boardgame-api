@@ -94,12 +94,21 @@ exports.insertComment = async (review_id, comment) => {
 };
 exports.insertReview = async (review) => {
     if (!validateReviewKeys(review)) return Promise.reject({ status: 400, message: 'invalid or missing key on review object' });
-    const insertedReview = await db.query(`INSERT INTO reviews
+    if (review.review_img_url) {
+        const insertedReview = await db.query(`INSERT INTO reviews
+                                            (title, review_body, owner, designer, category, review_img_url)
+                                            VALUES
+                                            ($1, $2, $3, $4, $5, $6) RETURNING *`, formatReviewData(review));
+        insertedReview.rows[0].comment_count = 0;
+        return insertedReview.rows[0];
+    } else {
+        const insertedReview = await db.query(`INSERT INTO reviews
                                             (title, review_body, owner, designer, category)
                                             VALUES
                                             ($1, $2, $3, $4, $5) RETURNING *`, formatReviewData(review));
-    insertedReview.rows[0].comment_count = 0;
-    return insertedReview.rows[0];
+        insertedReview.rows[0].comment_count = 0;
+        return insertedReview.rows[0];
+    }
 };
 exports.insertCategory = async (category) => {
     if (!validateCategoryKeys(category)) return Promise.reject({ status: 400, message: 'invalid or missing key on category object' });
